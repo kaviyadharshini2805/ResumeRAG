@@ -58,6 +58,8 @@ git clone https://github.com/your-username/resume-rag.git
 cd resume-rag
 
 pip install -r requirements.txt
+
+```
 🔑 Setup
 
 If using Gemini:
@@ -68,16 +70,16 @@ genai.configure(api_key="YOUR_API_KEY")
 ▶️ Run the Project
 python rag.py
 
-Then ask questions like:
+### Then ask questions like:
 
 What skills does the candidate have?
 What projects are mentioned in the resume?
 What is the candidate’s experience?
+```
 📌 Example Output
 Question: What projects has the candidate worked on?
-
-Answer:
+```
+### Answer:
 - RAG-based PDF Chatbot
 - EV Battery Management System
 - MSG Detection Kit
-'''
