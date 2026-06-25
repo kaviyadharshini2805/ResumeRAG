@@ -1,45 +1,42 @@
 import faiss
-import numpy as np
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import google.generativeai as genai
 
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-
-GEMINI_API_KEY = "YOUR_API_KEY"
-genai.configure(api_key=GEMINI_API_KEY)
+genai.configure(api_key="YOUR_API_KEY_GOES_HERE")
 llm = genai.GenerativeModel("gemini-2.5-flash")
+
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 def load_document(file_path):
     reader = PdfReader(file_path)
-    content = []
+    text = []
 
     for page in reader.pages:
-        text = page.extract_text()
-        if text:
-            content.append(text)
+        page_text = page.extract_text()
+        if page_text:
+            text.append(page_text)
 
-    return "\n".join(content)
+    return "\n".join(text)
 
 
-def split_chunks(text, chunk_size=500, chunk_overlap=50):
-
-    if chunk_overlap >= chunk_size:
-        raise ValueError("chunk_overlap must be smaller than chunk_size")
-
-    chunks = []
-    step = chunk_size - chunk_overlap
-
-    for i in range(0, len(text), step):
-        chunks.append(text[i:i + chunk_size])
-
-    return chunks
+def split_chunks(text):
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=3,
+        separators=["\n\n", "\n", ". ", " ", ""]
+    )
+    return splitter.split_text(text)
 
 
 def create_embeddings(chunks):
-    embeddings = embedding_model.encode(chunks)
-    return np.array(embeddings).astype("float32")
+    return embedding_model.encode(
+        chunks,
+        convert_to_numpy=True,
+        normalize_embeddings=True
+    ).astype("float32")
 
 
 def build_index(embeddings):
@@ -50,35 +47,55 @@ def build_index(embeddings):
 
 
 def search(question, index, chunks, k=3):
+    query_embedding = embedding_model.encode(
+        [question],
+        convert_to_numpy=True,
+        normalize_embeddings=True
+    ).astype("float32")
 
-    question_embedding = embedding_model.encode([question]).astype("float32")
+    scores, indices = index.search(query_embedding, k)
 
-    distances, indices = index.search(question_embedding, k)
+    retrieved = []
 
-    results = []
-
-    for idx in indices[0]:
+    for score, idx in zip(scores[0], indices[0]):
         if idx != -1:
-            results.append(chunks[idx])
+            retrieved.append({
+                "score": float(score),
+                "text": chunks[idx]
+            })
 
-    return results
+    return retrieved
 
 
 def generate_answer(question, retrieved_chunks):
 
-    context = "\n\n".join(retrieved_chunks)
+    if not retrieved_chunks:
+        return "I couldn't find that information in the document."
+
+    context = "\n\n".join(
+        chunk["text"] for chunk in retrieved_chunks
+    )
 
     prompt = f"""
-Answer the question only using the context below.
+You are an AI Resume Assistant.
 
-If the answer is not in the context, say:
-"I couldn't find that information in the resume."
+Use ONLY the document context below.
 
-Context:
+Rules:
+- Answer only the user's question.
+- Ignore unrelated information.
+- Do not hallucinate.
+- Use headings and bullet points whenever appropriate.
+- If the answer is not present, reply:
+"I couldn't find that information in the document."
+
+Resume Context:
 {context}
 
 Question:
 {question}
+
+Answer:
 """
 
     response = llm.generate_content(prompt)
@@ -87,9 +104,11 @@ Question:
 
 def main():
 
-    text = load_document("resume.pdf")
+    text = load_document("AboutMe.pdf")
 
     chunks = split_chunks(text)
+
+    #print(f"Chunks Created: {len(chunks)}")
 
     embeddings = create_embeddings(chunks)
 
@@ -97,17 +116,26 @@ def main():
 
     while True:
 
-        question = input("Ask a question (type exit to stop): ")
+        question = input("\nAsk a question (type exit to stop): ")
 
         if question.lower() == "exit":
             break
 
         retrieved_chunks = search(question, index, chunks)
 
+        print("\nRetrieved Chunks")
+        print("-" * 80)
+
+        for i, chunk in enumerate(retrieved_chunks, 1):
+            #print(f"\nChunk {i} | Score: {chunk['score']:.4f}")
+            print(chunk["text"])
+            print("-" * 80)
+
         answer = generate_answer(question, retrieved_chunks)
 
-        print("\nAnswer:\n", answer)
-        print("-" * 50)
+        print("\nAnswer")
+        print("-" * 80)
+        print(answer)
 
 
 if __name__ == "__main__":
