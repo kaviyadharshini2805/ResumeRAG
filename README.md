@@ -67,9 +67,10 @@ If using Gemini:
 Get API key from Google AI Studio
 Add it in your code:
 genai.configure(api_key="YOUR_API_KEY")
+```
 ▶️ Run the Project
 python rag.py
-
+```
 ### Then ask questions like:
 
 What skills does the candidate have?
