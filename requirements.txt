@@ -1,0 +1,8 @@
+faiss-cpu
+numpy
+pypdf
+sentence-transformers
+langchain-text-splitters
+google-generativeai
+torch
+transformers
