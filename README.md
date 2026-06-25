@@ -54,7 +54,7 @@ LLM Response Generation
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/your-username/resume-rag.git
+git clone https://github.com/kaviyadharshini2805/ResumeRAG.git
 cd resume-rag
 
 pip install -r requirements.txt
