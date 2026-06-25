@@ -40,7 +40,7 @@ LLM Response Generation
 ```
 ---
 
-## 🛠️ Tech Stack
+## 👩🏻‍💻 Tech Stack
 
 - Python
 - PyPDF
