@@ -1,4 +1,4 @@
-# 📄 Resume RAG System (From Scratch)
+# 📄 Resume RAG System
 
 A simple **Retrieval-Augmented Generation (RAG)** system built from scratch using Python.  
 It allows you to ask questions about a resume and get accurate, context-aware answers.
@@ -67,10 +67,10 @@ If using Gemini:
 Get API key from Google AI Studio
 Add it in your code:
 genai.configure(api_key="YOUR_API_KEY")
-```
+---
 ▶️ Run the Project
 python rag.py
-```
+---
 ### Then ask questions like:
 
 What skills does the candidate have?
