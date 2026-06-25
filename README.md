@@ -15,10 +15,10 @@ It allows you to ask questions about a resume and get accurate, context-aware an
 - Uses an LLM (Gemini/OpenAI) to generate final answers
 
 ---
-```
+
 ## 🧠 How It Works
 
-
+```
 PDF Resume
 ↓
 Text Extraction (PyPDF)
