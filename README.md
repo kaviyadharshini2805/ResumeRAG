@@ -63,10 +63,18 @@ pip install -r requirements.txt
 🔑 Setup
 
 If using Gemini:
-
+---
 Get API key from Google AI Studio
+---
+
+---
 Add it in your code:
+---
+
+---
 genai.configure(api_key="YOUR_API_KEY")
+---
+
 ---
 ▶️ Run the Project
 python rag.py
